@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WK Health — Competitive Intelligence</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a1a; font-size: 14px; line-height: 1.5; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .subtitle { font-size: 11px; font-weight: 500; color: #888; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
+  .region-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .region-btn { padding: 6px 14px; border-radius: 8px; font-size: 13px; border: 0.5px solid #ddd; background: #fff; color: #1a1a1a; cursor: pointer; transition: all .15s; }
+  .region-btn.active { border: 1.5px solid #1D9E75; background: #E1F5EE; color: #0F6E56; font-weight: 500; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+  .kpi { background: #ebebea; border-radius: 8px; padding: 12px 14px; }
+  .kpi-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .kpi-val { font-size: 20px; font-weight: 500; }
+  .tabs { display: flex; gap: 2px; border-bottom: 0.5px solid #ddd; margin-bottom: 20px; }
+  .tab-btn { padding: 8px 16px; font-size: 13px; border: none; background: transparent; color: #888; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; transition: all .15s; }
+  .tab-btn.active { color: #0F6E56; border-bottom-color: #1D9E75; font-weight: 500; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .card { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; padding: 16px 20px; }
+  .card-label { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 10px; }
+  .two-col { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 14px; margin-bottom: 14px; }
+  .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #E1F5EE; color: #0F6E56; border: 0.5px solid #9FE1CB; display: inline-block; margin: 2px; }
+  .side-bar-green { font-size: 12px; padding: 4px 8px; margin-bottom: 5px; border-left: 2px solid #5DCAA5; }
+  .side-bar-red { font-size: 12px; padding: 4px 8px; margin-bottom: 5px; border-left: 2px solid #F0997B; }
+  .strength-card { background: #fff; border: 0.5px solid #9FE1CB; border-radius: 12px; padding: 14px 18px; }
+  .strength-title { font-size: 12px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
+  .weakness-card { background: #fff; border: 0.5px solid #F5C4B3; border-radius: 12px; padding: 14px 18px; }
+  .weakness-title { font-size: 12px; font-weight: 500; color: #993C1D; margin-bottom: 8px; }
+  .move-tag { font-size: 12px; padding: 4px 12px; border-radius: 8px; background: #ebebea; color: #1a1a1a; border: 0.5px solid #ddd; display: inline-block; margin: 3px; }
+  .maturity-bar { display: flex; gap: 4px; align-items: center; margin-top: 6px; }
+  .maturity-dot { width: 16px; height: 16px; border-radius: 3px; border: 0.5px solid #ddd; }
+  .maturity-dot.filled { background: #1D9E75; border-color: #1D9E75; }
+  .comp-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .comp-btn { padding: 6px 14px; font-size: 12px; border-radius: 8px; border: 0.5px solid #ddd; background: #fff; color: #1a1a1a; cursor: pointer; transition: all .15s; }
+  .comp-btn.active { border: 1.5px solid #534AB7; background: #EEEDFE; color: #3C3489; }
+  .comp-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 12px; }
+  .comp-kpi { background: #ebebea; border-radius: 8px; padding: 10px 14px; }
+  .comp-kpi-label { font-size: 11px; color: #888; margin-bottom: 3px; }
+  .comp-kpi-val { font-size: 13px; font-weight: 500; }
+  .vp-box { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; padding: 14px 18px; }
+  .vp-text { font-size: 13px; font-style: italic; margin-bottom: 14px; }
+  .wl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wl-label-green { font-size: 11px; font-weight: 500; color: #0F6E56; margin-bottom: 6px; }
+  .wl-label-red { font-size: 11px; font-weight: 500; color: #993C1D; margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: center; padding: 8px 10px; font-weight: 500; color: #888; font-size: 12px; border-bottom: 0.5px solid #ddd; }
+  th:first-child { text-align: left; }
+  td { padding: 10px; border-bottom: 0.5px solid #ddd; text-align: center; }
+  td:first-child { text-align: left; }
+  tr:nth-child(even) { background: #f8f8f7; }
+  .score { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+  .s5 { background: #1D9E7533; color: #1D9E75; }
+  .s4 { background: #63992233; color: #639922; }
+  .s3 { background: #BA751733; color: #BA7517; }
+  .s2 { background: #D85A3033; color: #D85A30; }
+  .s1 { background: #A32D2D33; color: #A32D2D; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .legend-item { font-size: 11px; display: flex; align-items: center; gap: 5px; color: #888; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid; display: inline-block; }
+  .threat-card { background: #fff; border: 0.5px solid #F5C4B3; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px; }
+  .threat-title { font-size: 13px; font-weight: 500; color: #993C1D; margin-bottom: 10px; }
+  .opp-card { background: #fff; border: 0.5px solid #9FE1CB; border-radius: 12px; padding: 16px 20px; }
+  .opp-title { font-size: 13px; font-weight: 500; color: #0F6E56; margin-bottom: 10px; }
+  .num-badge { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; margin-right: 8px; }
+  .num-red { background: #FAECE7; color: #993C1D; }
+  .num-green { background: #E1F5EE; color: #0F6E56; }
+  .list-item { display: flex; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
+  .wk-col { color: #0F6E56; }
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col, .comp-grid, .wl-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="subtitle">Wolters Kluwer Health — Competitive Intelligence</div>
+
+  <div class="region-bar" id="regionBar"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Market size</div><div class="kpi-val" id="kpiSize"></div></div>
+    <div class="kpi"><div class="kpi-label">CAGR</div><div class="kpi-val" id="kpiCagr"></div></div>
+    <div class="kpi"><div class="kpi-label">WK est. share</div><div class="kpi-val" id="kpiShare"></div></div>
+    <div class="kpi"><div class="kpi-label">WK est. revenue</div><div class="kpi-val" id="kpiRev"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setTab('overview')">Overview</button>
+    <button class="tab-btn" onclick="setTab('competitors')">Competidores</button>
+    <button class="tab-btn" onclick="setTab('features')">Feature matrix</button>
+    <button class="tab-btn" onclick="setTab('strategy')">Estrategia</button>
+  </div>
+
+  <div id="tab-overview" class="tab-content active"></div>
+  <div id="tab-competitors" class="tab-content"></div>
+  <div id="tab-features" class="tab-content"></div>
+  <div id="tab-strategy" class="tab-content"></div>
+</div>
+
+<script>
+const DATA = {
+  "EMEA": {
+    marketSize:"$9.8B",cagr:"10.1%",maturity:3,
+    wk:{products:["UpToDate","Ovid","Lippincott Solutions","Medi-Span (select)"],shareEst:"16%",revEst:"~$380M",model:"NHS/Gov framework + Institutional SaaS",strengths:["NHS England national contract","Ovid strong in academic research","UpToDate brand in private hospitals"],weaknesses:["Language gaps outside EN/DE/FR/ES","Limited presence in Eastern Europe & MEA","Local players outcompete on price"],recentMoves:["NHS framework renewal 2023","German UpToDate content expansion","Middle East gov outreach (UAE, KSA)"]},
+    competitors:[
+      {name:"BMJ Best Practice",products:"BMJ Best Practice, BMJ Learning",target:"GPs, NHS & European clinicians",vp:"UK-native, NICE-aligned, trusted by European public health systems",share:"18%",rev:"~$180M (BMJ total)",growth:"9%",model:"NHS national license + institutional",wkWins:"Specialist depth, drug info",wkLoses:"NHS/public health trust — BMJ seen as local"},
+      {name:"Elsevier / ClinicalKey",products:"ClinicalKey EU, Mosby, Urban & Fischer",target:"Hospitals, universities, research",vp:"Largest European medical library with local language content",share:"17%",rev:"~$600M EMEA (est.)",growth:"8%",model:"Institutional + gov",wkWins:"Point-of-care CDS quality",wkLoses:"Local language content volume, academic research"},
+      {name:"AMBOSS",products:"AMBOSS Medical Knowledge Platform",target:"Students, residents, physicians (DACH+)",vp:"German-native, modern UX, AI-driven, strong community",share:"9%",rev:"~$80M est.",growth:"22%",model:"B2C + B2B SaaS",wkWins:"Senior physician CDS depth",wkLoses:"Resident/student segment, UX modernity"},
+      {name:"NICE / BNF (UK gov)",products:"NICE Guidelines, BNF, BNFC",target:"All NHS staff",vp:"Free at point of care, government-backed, NICE-aligned",share:"~35% mindshare (UK)",rev:"Publicly funded",growth:"N/A",model:"Free / gov funded",wkWins:"Evidence synthesis, global literature","wkLoses":"Free is hard to beat in primary care"},
+    ],
+    features:[
+      {feature:"Clinical Decision Support",wk:5,elsevier:4,epic:3,ebsco:3},
+      {feature:"Drug Information",wk:4,elsevier:3,epic:2,ebsco:3},
+      {feature:"AI / ML Capabilities",wk:3,elsevier:4,epic:3,ebsco:2},
+      {feature:"EHR Integration",wk:3,elsevier:3,epic:4,ebsco:2},
+      {feature:"Patient Education",wk:3,elsevier:3,epic:2,ebsco:3},
+      {feature:"Mobile App",wk:4,elsevier:4,epic:3,ebsco:4},
+      {feature:"Analytics / Reporting",wk:3,elsevier:3,epic:3,ebsco:2},
+    ],
+    threats:["NICE/BNF free resources limitando penetración de CDS pagado en sistemas públicos UK/EU","AMBOSS expansión B2B rápida en cuentas hospitalarias DACH","Presiones presupuestarias NHS y UE retrasando renovaciones"],
+    opportunities:["ICS (Integrated Care Systems) framework deals en UK","Contratos enterprise en grupos hospitalarios DACH (Helios, Asklepios, Sana)","Expansión en sistemas de salud del Golfo — UAE, KSA Vision 2030"],
+  },
+  "UK & Ireland": {
+    marketSize:"$3.1B",cagr:"9.4%",maturity:4,
+    wk:{products:["UpToDate","Ovid","Lippincott"],shareEst:"18%",revEst:"~$120M",model:"NHS framework / Institutional SaaS",strengths:["NHS framework contract position","Ovid para instituciones de investigación","Fuerte presencia en hospitales académicos"],weaknesses:["BMJ y NICE integrados en flujos NHS","Poca personalización de contenido local"],recentMoves:["Renovación contrato nacional NHS England (2023)"]},
+    competitors:[
+      {name:"BMJ Best Practice",products:"BMJ Best Practice, BMJ Learning",target:"GPs, clínicos NHS",vp:"UK-nativo, alineado con NICE, guías clínicas locales",share:"25%",rev:"~$180M BMJ total",growth:"9%",model:"Licencia nacional NHS",wkWins:"Profundidad especialista",wkLoses:"Confianza NHS — BMJ es 'de casa'"},
+      {name:"Elsevier / ClinicalKey",products:"ClinicalKey, Mosby Nursing",target:"Hospitales, universidades",vp:"Contenido clínico + investigación integrado",share:"14%",rev:"N/A (slice UK)",growth:"7%",model:"Institucional",wkWins:"Información de medicamentos",wkLoses:"Contenido de investigación académica"},
+      {name:"NICE / NHS Digital",products:"NICE guidelines, BNF/BNFC",target:"Todo el personal NHS",vp:"Gratuito en punto de atención, respaldado por el gobierno",share:"~40% mindshare",rev:"Financiado públicamente",growth:"N/A",model:"Gratuito / financiado gov",wkWins:"Síntesis de evidencia, literatura US",wkLoses:"Gratuito imbatible en atención primaria"},
+    ],
+    features:[
+      {feature:"Clinical Decision Support",wk:5,elsevier:4,epic:3,ebsco:3},
+      {feature:"Drug Information",wk:4,elsevier:3,epic:2,ebsco:3},
+      {feature:"AI / ML Capabilities",wk:3,elsevier:3,epic:3,ebsco:2},
+      {feature:"EHR Integration",wk:3,elsevier:3,epic:4,ebsco:2},
+      {feature:"Patient Education",wk:3,elsevier:3,epic:2,ebsco:3},
+      {feature:"Mobile App",wk:4,elsevier:4,epic:3,ebsco:4},
+      {feature:"Analytics / Reporting",wk:3,elsevier:3,epic:3,ebsco:2},
+    ],
+    threats:["Recursos gratuitos NICE/BNF reduciendo penetración CDS","Recortes presupuestarios NHS retrasando renovaciones","BMJ ampliando suite de productos digitales"],
+    opportunities:["Acuerdos de framework ICS","Posicionamiento UpToDate + NICE","Bundle contratos académicos con Ovid"],
+  },
+  "DACH": {
+    marketSize:"$4.2B",cagr:"8.1%",maturity:3,
+    wk:{products:["UpToDate (DE)","Ovid","Lippincott (traducido)"],shareEst:"11%",revEst:"~$90M",model:"Institucional / Grupo hospitalario",strengths:["Fuerte penetración en hospitales universitarios","Ovid para investigación"],weaknesses:["Barrera idiomática — poco contenido CDS en alemán","Players locales profundamente integrados en KBV"],recentMoves:["Expansión contenido UpToDate en alemán"]},
+    competitors:[
+      {name:"AMBOSS",products:"AMBOSS Medical Knowledge",target:"Estudiantes, residentes, médicos",vp:"Nativo alemán, UX moderno, AI, comunidad médica fuerte",share:"20%",rev:"~$80M est.",growth:"22%",model:"B2C + B2B SaaS",wkWins:"CDS especializado para adjuntos",wkLoses:"Segmento residente/estudiante — AMBOSS domina"},
+      {name:"Springer Medizin",products:"SpringerLink, e.Medpedia",target:"Médicos académicos",vp:"Confianza editorial alemana, biblioteca médica profunda",share:"16%",rev:"$500M+ salud (global)",growth:"5%",model:"Institucional",wkWins:"CDS práctico",wkLoses:"Profundidad de contenido académico alemán"},
+      {name:"Elsevier DE",products:"ClinicalKey DE, Urban & Fischer",target:"Universidades, hospitales",vp:"Libros de texto en alemán + digital",share:"12%",rev:"N/A",growth:"6%",model:"Institucional",wkWins:"Info de medicamentos (Medi-Span)",wkLoses:"Contenido en idioma local"},
+    ],
+    features:[
+      {feature:"Clinical Decision Support",wk:4,elsevier:3,epic:2,ebsco:2},
+      {feature:"Drug Information",wk:4,elsevier:3,epic:2,ebsco:2},
+      {feature:"AI / ML Capabilities",wk:3,elsevier:3,epic:2,ebsco:3},
+      {feature:"EHR Integration",wk:3,elsevier:2,epic:3,ebsco:2},
+      {feature:"Patient Education",wk:2,elsevier:2,epic:2,ebsco:2},
+      {feature:"Mobile App",wk:3,elsevier:3,epic:2,ebsco:3},
+      {feature:"Analytics / Reporting",wk:2,elsevier:3,epic:2,ebsco:2},
+    ],
+    threats:["Expansión B2B de AMBOSS apuntando a cuentas hospitalarias WK","Brecha idiomática — usuarios prefieren herramientas nativas en alemán","Ventaja de contenido local de Springer/Elsevier"],
+    opportunities:["Adquirir o partner con player CDS en alemán","Acuerdos enterprise con grupos hospitalarios (Helios, Asklepios, Sana)","Inversión en contenido UpToDate en alemán"],
+  },
+  "LatAm": {
+    marketSize:"$2.8B",cagr:"13.5%",maturity:2,
+    wk:{products:["UpToDate (ES/PT)","Lippincott (ES)"],shareEst:"14%",revEst:"~$60M",model:"Institucional / Contratos gubernamentales",strengths:["Contenido en español y portugués","Presencia en hospitales universitarios BR/MX/AR"],weaknesses:["Precio alto para mercados emergentes","Poco contenido regulatorio local","Cobertura comercial escasa"],recentMoves:["Acercamiento al sistema SUS de Brasil","Piloto con IMSS México"]},
+    competitors:[
+      {name:"Elsevier LatAm",products:"ClinicalKey ES, Mosby ES",target:"Hospitales, universidades",vp:"Mayor biblioteca médica en español, precios locales",share:"18%",rev:"N/A",growth:"15%",model:"Gobierno + institucional",wkWins:"Herramientas de info de medicamentos",wkLoses:"Volumen de contenido local, flexibilidad de precios"},
+      {name:"Intramed / Players locales",products:"Intramed, Mediline",target:"Médicos de cabecera",vp:"Bajo coste, nativo en español, alojado localmente",share:"10%",rev:"~$15M",growth:"18%",model:"SaaS de bajo coste",wkWins:"Calidad de evidencia clínica",wkLoses:"Precio — Intramed 10x más barato"},
+      {name:"EBSCO / DynaMed ES",products:"DynaMed ES",target:"Residentes, médicos generales",vp:"Basado en evidencia, precios institucionales asequibles",share:"8%",rev:"N/A",growth:"12%",model:"Institucional",wkWins:"Reconocimiento de marca en hospitales privados",wkLoses:"Precio y profundidad en idioma local"},
+    ],
+    features:[
+      {feature:"Clinical Decision Support",wk:4,elsevier:4,epic:1,ebsco:3},
+      {feature:"Drug Information",wk:4,elsevier:3,epic:1,ebsco:2},
+      {feature:"AI / ML Capabilities",wk:2,elsevier:3,epic:1,ebsco:2},
+      {feature:"EHR Integration",wk:2,elsevier:2,epic:2,ebsco:2},
+      {feature:"Patient Education",wk:3,elsevier:3,epic:1,ebsco:2},
+      {feature:"Mobile App",wk:4,elsevier:3,epic:1,ebsco:3},
+      {feature:"Analytics / Reporting",wk:2,elsevier:2,epic:1,ebsco:2},
+    ],
+    threats:["Herramientas locales gratuitas/freemium capturando segmento de médicos generales","Volatilidad de divisas reduce predisposición a contratos en USD","Inversión local de Elsevier superando a WK"],
+    opportunities:["Licencias masivas gov/Ministerio de Salud (MX, CO, AR)","Modelo de precios por tramos para LatAm","Integraciones con plataformas de telemedicina (crecimiento post-COVID)"],
+  },
+  "APAC": {
+    marketSize:"$6.7B",cagr:"14.2%",maturity:2,
+    wk:{products:["UpToDate","Ovid"],shareEst:"9%",revEst:"~$110M",model:"Institucional / Contratos ministeriales",strengths:["Fuerte en ANZ, Singapur, HK hospitales privados","Contrato gubernamental en mercados seleccionados"],weaknesses:["Mercado chino prácticamente cerrado","Brecha de idioma local JP/KR/TH","Sensibilidad al precio en la mayoría de mercados"],recentMoves:["Framework MOH Singapur","Contenido alineado con AHPRA Australia"]},
+    competitors:[
+      {name:"Elsevier APAC",products:"ClinicalKey APAC, Scopus",target:"Hospitales académicos, investigación",vp:"Investigación + clínica combinada, equipos locales",share:"14%",rev:"N/A",growth:"16%",model:"Institucional + gov",wkWins:"CDS práctico",wkLoses:"Contenido de investigación, soporte idioma local"},
+      {name:"MIMS (Australia/SEA)",products:"MIMS Drug Reference, MIMS Online",target:"Médicos generales, farmacéuticos, hospitales SEA",vp:"APAC-nativo, info de medicamentos, integrado en EHRs regionales",share:"12%",rev:"~$40M",growth:"9%",model:"Por usuario / bundle",wkWins:"Síntesis de evidencia clínica",wkLoses:"Info de medicamentos en SEA — MIMS lo domina"},
+      {name:"Yixue / Players locales (China)",products:"Yixue, MCDEX",target:"Clínicos chinos, GPs APAC",vp:"Idioma local, contenido regulatorio local, asequible",share:"25% (regional)",rev:"N/A",growth:"20%",model:"SaaS bajo coste",wkWins:"Calidad de evidencia internacional",wkLoses:"Mercado local — WK apenas compite"},
+    ],
+    features:[
+      {feature:"Clinical Decision Support",wk:4,elsevier:4,epic:2,ebsco:3},
+      {feature:"Drug Information",wk:4,elsevier:3,epic:1,ebsco:2},
+      {feature:"AI / ML Capabilities",wk:2,elsevier:3,epic:2,ebsco:2},
+      {feature:"EHR Integration",wk:3,elsevier:3,epic:3,ebsco:2},
+      {feature:"Patient Education",wk:2,elsevier:2,epic:1,ebsco:2},
+      {feature:"Mobile App",wk:4,elsevier:3,epic:2,ebsco:3},
+      {feature:"Analytics / Reporting",wk:2,elsevier:3,epic:2,ebsco:2},
+    ],
+    threats:["Players locales (MIMS, Yixue) demasiado arraigados en info de medicamentos","Sensibilidad al precio limitando el tamaño de los contratos enterprise","Falta de contenido en idioma local = brecha de percepción"],
+    opportunities:["Contratos con sistemas hospitalarios públicos ANZ","Expansión en hospitales privados de India (Apollo, Fortis)","Partnerships con plataformas de telemedicina en SEA"],
+  },
+};
+
+const REGIONS = ["EMEA","UK & Ireland","DACH","LatAm","APAC"];
+const COMP_KEYS = ["elsevier","epic","ebsco"];
+const COMP_LABELS = {elsevier:"Elsevier",epic:"Epic/EHR",ebsco:"EBSCO/DynaMed"};
+const SCORE_COLORS = {5:"#1D9E75",4:"#639922",3:"#BA7517",2:"#D85A30",1:"#A32D2D"};
+
+let currentRegion = "EMEA";
+let currentComp = 0;
+let currentTab = "overview";
+
+function setRegion(r) {
+  currentRegion = r;
+  currentComp = 0;
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.r === r));
+  updateKPIs();
+  renderAll();
+}
+
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(t) || (t==='overview'&&b.textContent==='Overview')||(t==='competitors'&&b.textContent==='Competidores')||(t==='features'&&b.textContent==='Feature matrix')||(t==='strategy'&&b.textContent==='Estrategia')));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+function setComp(i) {
+  currentComp = i;
+  renderCompetitors();
+}
+
+function updateKPIs() {
+  const d = DATA[currentRegion];
+  document.getElementById('kpiSize').textContent = d.marketSize;
+  document.getElementById('kpiCagr').textContent = d.cagr;
+  document.getElementById('kpiShare').textContent = d.wk.shareEst;
+  document.getElementById('kpiRev').textContent = d.wk.revEst;
+}
+
+function maturityDots(val) {
+  return `<div class="maturity-bar">${[1,2,3,4,5].map(i=>`<div class="maturity-dot${i<=val?' filled':''}"></div>`).join('')}<span style="font-size:12px;color:#888;margin-left:4px">${val}/5</span></div>`;
+}
+
+function scoreBadge(v) {
+  return `<span class="score s${v}">${v}</span>`;
+}
+
+function renderOverview() {
+  const d = DATA[currentRegion];
+  document.getElementById('tab-overview').innerHTML = `
+    <div class="two-col">
+      <div class="card">
+        <div class="card-label">Productos WK en el mercado</div>
+        <div>${d.wk.products.map(p=>`<span class="tag">${p}</span>`).join('')}</div>
+        <div style="margin-top:14px;font-size:12px;color:#888">Modelo de precios</div>
+        <div style="font-size:13px;margin-top:2px">${d.wk.model}</div>
+        <div style="margin-top:10px;font-size:12px;color:#888">Madurez digital del mercado</div>
+        ${maturityDots(d.maturity)}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="strength-card" style="flex:1">
+          <div class="strength-title">Fortalezas</div>
+          ${d.wk.strengths.map(s=>`<div class="side-bar-green">${s}</div>`).join('')}
+        </div>
+        <div class="weakness-card" style="flex:1">
+          <div class="weakness-title">Debilidades</div>
+          ${d.wk.weaknesses.map(s=>`<div class="side-bar-red">${s}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Movimientos estratégicos recientes</div>
+      ${d.wk.recentMoves.map(m=>`<span class="move-tag">&#8594; ${m}</span>`).join('')}
+    </div>`;
+}
+
+function renderCompetitors() {
+  const d = DATA[currentRegion];
+  const c = d.competitors[currentComp];
+  document.getElementById('tab-competitors').innerHTML = `
+    <div class="comp-bar">
+      ${d.competitors.map((cp,i)=>`<button class="comp-btn${i===currentComp?' active':''}" onclick="setComp(${i})">${cp.name}</button>`).join('')}
+    </div>
+    <div class="comp-grid">
+      ${[['Productos',c.products],['Usuario objetivo',c.target],['Share est.',c.share],['Revenue est.',c.rev],['Crecimiento YoY',c.growth],['Modelo de precios',c.model]].map(([l,v])=>`
+        <div class="comp-kpi"><div class="comp-kpi-label">${l}</div><div class="comp-kpi-val">${v}</div></div>`).join('')}
+    </div>
+    <div class="vp-box">
+      <div class="card-label">Propuesta de valor</div>
+      <div class="vp-text">&ldquo;${c.vp}&rdquo;</div>
+      <div class="wl-grid">
+        <div>
+          <div class="wl-label-green">WK gana cuando...</div>
+          <div class="side-bar-green">${c.wkWins}</div>
+        </div>
+        <div>
+          <div class="wl-label-red">WK pierde cuando...</div>
+          <div class="side-bar-red">${c.wkLoses}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderFeatures() {
+  const d = DATA[currentRegion];
+  document.getElementById('tab-features').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Feature</th>
+        <th class="wk-col">WK</th>
+        ${COMP_KEYS.map(k=>`<th>${COMP_LABELS[k]}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${d.features.map(row=>`<tr>
+          <td>${row.feature}</td>
+          <td>${scoreBadge(row.wk)}</td>
+          ${COMP_KEYS.map(k=>`<td>${scoreBadge(row[k])}</td>`).join('')}
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="legend">
+      ${[5,4,3,2,1].map(s=>`<span class="legend-item"><span class="legend-dot" style="background:${SCORE_COLORS[s]}33;border-color:${SCORE_COLORS[s]}"></span>${s} — ${['','Muy débil','Débil','Moderado','Fuerte','Líder'][s]}</span>`).join('')}
+    </div>`;
+}
+
+function renderStrategy() {
+  const d = DATA[currentRegion];
+  document.getElementById('tab-strategy').innerHTML = `
+    <div class="threat-card">
+      <div class="threat-title">Principales amenazas (12–18 meses)</div>
+      ${d.threats.map((t,i)=>`<div class="list-item"><span class="num-badge num-red">${i+1}</span>${t}</div>`).join('')}
+    </div>
+    <div class="opp-card">
+      <div class="opp-title">Oportunidades de crecimiento</div>
+      ${d.opportunities.map((o,i)=>`<div class="list-item"><span class="num-badge num-green">${i+1}</span>${o}</div>`).join('')}
+    </div>`;
+}
+
+function renderAll() {
+  renderOverview();
+  renderCompetitors();
+  renderFeatures();
+  renderStrategy();
+}
+
+// Init region buttons
+const bar = document.getElementById('regionBar');
+REGIONS.forEach(r => {
+  const b = document.createElement('button');
+  b.className = 'region-btn' + (r === currentRegion ? ' active' : '');
+  b.dataset.r = r;
+  b.textContent = r;
+  b.onclick = () => setRegion(r);
+  bar.appendChild(b);
+});
+
+updateKPIs();
+renderAll();
+</script>
+</body>
+</html>
